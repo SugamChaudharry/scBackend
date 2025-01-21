@@ -2,6 +2,15 @@ import mongoose, { Schema } from "mongoose";
 
 const profileSchema = new Schema(
   {
+    title: {
+      type: String,
+    },
+    about: {
+      type: String,
+    },
+    viwes: {
+
+    },
     githubUrl: {
       type: String,
     },
