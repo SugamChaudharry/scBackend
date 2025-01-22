@@ -2,18 +2,17 @@ import { Router } from "express";
 import {
   getAllPosts,
   createPost,
-  getUserPost,
   updatePost,
   deletePost,
 } from "../controllers/post.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT, verifyJWTLite } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
 
 router
   .route("/")
-  .get(getAllPosts)
+  .get(verifyJWTLite, getAllPosts)
   .post(
     verifyJWT,
     upload.fields([
@@ -24,7 +23,6 @@ router
     ]),
     createPost,
   );
-router.route("/user/:userId").get(getUserPost);
 router.use(verifyJWT);
 router.route("/:postId").patch(updatePost).delete(deletePost);
 
