@@ -4,7 +4,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { v2 as cloudinary } from "cloudinary";
 
 const createPost = asyncHandler(async (req, res) => {
   const { content } = req.body;
@@ -30,47 +29,6 @@ const createPost = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, post, "Post created successfully"));
-});
-
-const getUserPost = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(userId))
-    throw new ApiError(404, "invalid params id");
-
-  const posts = await Post.aggregate([
-    {
-      $match: {
-        owner: new mongoose.Types.ObjectId(userId),
-      },
-    },
-    {
-      $lookup: {
-        from: "likes",
-        foreignField: "post",
-        localField: "_id",
-        as: "likes",
-      },
-    },
-    {
-      $addFields: {
-        likes: {
-          $size: "$likes",
-        },
-      },
-    },
-    {
-      $sort: {
-        createdAt: -1,
-      },
-    },
-  ]);
-
-  if (!posts) {
-    throw new ApiError(404, "tweets not found");
-  }
-  return res
-    .status(200)
-    .json(new ApiResponse(200, posts, "tweets found successfully"));
 });
 
 const updatePost = asyncHandler(async (req, res) => {
@@ -108,10 +66,10 @@ const deletePost = asyncHandler(async (req, res) => {
 
 const getAllPosts = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, userId } = req.query;
-
+  const userIdFromReq = req.user?._id; // Get the current user's ID if logged in
   const skip = (page - 1) * limit;
   const matchStage = {};
-
+console.log(userIdFromReq, req.user)
   if (userId) {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json(new ApiResponse(404, "Invalid user id"));
@@ -132,16 +90,36 @@ const getAllPosts = asyncHandler(async (req, res) => {
     {
       $lookup: {
         from: "likes",
-        localField: "_id",
-        foreignField: "post",
+        localField: "_id", // The post ID
+        foreignField: "post", // Field in the "likes" collection that references the post
         as: "likes",
       },
     },
     {
       $addFields: {
-        likes: {
-          $size: "$likes",
-        },
+        likes: { $size: "$likes" }, // Count the total likes
+        isLiked: userIdFromReq
+          ? {
+              $cond: {
+                if: {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: "$likes", // Filter the likes array
+                          as: "like",
+                          cond: { $eq: ["$$like.likedBy", new mongoose.Types.ObjectId(req.user._id)] },
+                        },
+                      },
+                    },
+                    0,
+                  ],
+                },
+                then: true,
+                else: false,
+              },
+            }
+          : false, // Default to false if user is not logged in
       },
     },
     { $unwind: "$owner" },
@@ -150,6 +128,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
         image: 1,
         content: 1,
         likes: 1,
+        isLiked: 1,
         "owner.fullName": 1,
         "owner.userName": 1,
         "owner.avatar": 1,
@@ -189,4 +168,4 @@ const getAllPosts = asyncHandler(async (req, res) => {
   );
 });
 
-export { getAllPosts, createPost, getUserPost, updatePost, deletePost };
+export { getAllPosts, createPost, updatePost, deletePost };
