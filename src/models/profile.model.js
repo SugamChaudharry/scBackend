@@ -2,6 +2,10 @@ import mongoose, { Schema } from "mongoose";
 
 const profileSchema = new Schema(
   {
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     title: {
       type: String,
     },
@@ -9,7 +13,8 @@ const profileSchema = new Schema(
       type: String,
     },
     viwes: {
-
+      type: Number,
+      default: 0,
     },
     githubUrl: {
       type: String,
@@ -38,8 +43,8 @@ const profileSchema = new Schema(
         degree: String,
         field: String,
         graduationYear: String,
-      }
-    ]
+      },
+    ],
   },
   {
     timestamps: true,
