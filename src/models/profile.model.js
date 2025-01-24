@@ -45,6 +45,8 @@ const profileSchema = new Schema(
         graduationYear: String,
       },
     ],
+    location: {type: String},
+    skills: [String],
   },
   {
     timestamps: true,

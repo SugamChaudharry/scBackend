@@ -5,7 +5,7 @@ import { Profile } from "../models/profile.model.js";
 
 // Register a new profile
 const registerProfile = asyncHandler(async (req, res) => {
-  const {title,about, githubUrl, linkedinUrl, links, experience, education } = req.body;
+  const {title,about, githubUrl, linkedinUrl, links, experience, education, skills, location } = req.body;
 
   const existingProfile = await Profile.findOne({ owner: req.user._id });
 
@@ -22,6 +22,8 @@ const registerProfile = asyncHandler(async (req, res) => {
     links,
     experience,
     education,
+    skills,
+    location
   });
 
   return res
