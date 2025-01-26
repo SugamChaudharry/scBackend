@@ -24,8 +24,8 @@ const profileSchema = new Schema(
     },
     links: [
       {
-        title: String,
-        link: String,
+        name: String,
+        url: String,
       },
     ],
     experience: [
