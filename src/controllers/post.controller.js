@@ -129,6 +129,7 @@ console.log(userIdFromReq, req.user)
         content: 1,
         likes: 1,
         isLiked: 1,
+        "owner._id": 1,
         "owner.fullName": 1,
         "owner.userName": 1,
         "owner.avatar": 1,
