@@ -27,7 +27,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, {}, "Unsubscribed successfully"));
   } else {
     const newSubscription = await Subscription.create({
-      userId: userId,
+      user: userId,
       subscriber: req.user._id,
   });
     return res

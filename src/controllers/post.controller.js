@@ -69,7 +69,6 @@ const getAllPosts = asyncHandler(async (req, res) => {
   const userIdFromReq = req.user?._id; // Get the current user's ID if logged in
   const skip = (page - 1) * limit;
   const matchStage = {};
-console.log(userIdFromReq, req.user)
   if (userId) {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json(new ApiResponse(404, "Invalid user id"));
